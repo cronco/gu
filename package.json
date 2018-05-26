@@ -5,6 +5,7 @@
   "author": "Mihai Chereji <mihai@cronco.me>",
   "license": "MIT",
   "dependencies": {
+    "moment": "^2.22.1",
     "preact": "^8.2.9",
     "preact-compat": "^3.18.0"
   },

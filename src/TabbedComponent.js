@@ -2,6 +2,8 @@ import {Component, h} from 'preact';
 import cn from 'classnames';
 import {API_ENDPOINT, API_KEY, SECTIONS} from './consts.json';
 
+import moment from 'moment'
+
 import {urlBuilder} from './helpers.js'
 
 import './TabbedComponent.css';
@@ -14,14 +16,29 @@ class TabbedComponent extends Component {
 			results: {}
 		};
 
-		SECTIONS.forEach(sec => this.state.results[sec.key] = []);
 		console.log(this.state);
+		this.switchSection = this.switchSection.bind(this);
+		SECTIONS.forEach(sec => {
+			this.state.results[sec.key] = []
+		});
 	}
 
-	async componentDidMount() {
+	switchSection(section, e) {
+		//most basic of cache check
+		console.log(this.state)
+		if (!this.state.results[section].length)  {
+			this.getSectionResults(section);
+		}
+
+		this.setState({
+			activeTab: section
+		});
+	}
+
+	async getSectionResults(section) {
 		let res = await fetch(urlBuilder(API_ENDPOINT, {
 				api_key: API_KEY,
-				section: this.state.activeTab
+				section: section
 			}
 		)),
 			json = await res.json(), 
@@ -32,27 +49,40 @@ class TabbedComponent extends Component {
 			console.log(results)
 
 			let changes = {
-				results: {}
+				results: {...this.state.results}
 			};
 
-			changes.results[this.state.activeTab] = results;
+			changes.results[section] = results;
 			
-			this.setState(changes, () => {
-				console.log('got results', this.state)
-			})
+			this.setState(changes);
+	}
+
+	async componentDidMount() {
+		await this.getSectionResults(this.state.activeTab);
 	}
 
 	render(props, {activeTab, results}) {
-		return <div class="tabbed-component">
-			{SECTIONS.map((section) => {
-				return <span class={cn('tabbed-component__tab', {'active-tab': activeTab == section.key})}>{section.label}</span>
-			})}
-			<div class={cn('tabbed-component__content')}>
-				{results[activeTab].map(({webTitle, webUrl, webPublicationDate}) => {
-					return (<div class="tabbed-component__article"><a href={webUrl}>{webTitle}</a></div>);
+
+		let articles = results[activeTab] || [];
+
+		return (<div class="tabbed-component">
+			<div class="tabbed-component__tabs">
+				{SECTIONS.map((section) => {
+					return <span class={cn('tabbed-component__tab', {'active': activeTab == section.key})} onClick={this.switchSection.bind(this, section.key)}>{section.label}</span>
 				})}
 			</div>
-		</div>
+			<ol class={cn('tabbed-component__content')}>
+				{articles.map(({webTitle, webUrl, webPublicationDate}) => {
+					let momentDate = moment(webPublicationDate);
+					return (<li class="tabbed-component__article">
+							<a class="tabbed-component__article__link" href={webUrl}>
+							<h3 class="tabbed-component__article__link__title">{webTitle}</h3>
+								<span class="tabbed-component__article__timestamp" title={momentDate.format('MMMM Do YYYY, H:mm')}>{momentDate.fromNow()}</span>
+							</a>
+						</li>);
+				})}
+			</ol>
+		</div>)
 	}
 }
 
