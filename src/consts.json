@@ -1,0 +1,9 @@
+{
+	"API_KEY": "9wur7sdh84azzazdt3ye54k4",
+	"API_ENDPOINT": "//content.guardianapis.com/search",
+	"SECTIONS": [
+		{"key": "uk-news", "label": "UK News"},
+		{"key":  "football", "label": "Football"},
+		{"key":  "travel", "label": "Travel"}]
+
+}
