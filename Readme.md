@@ -1,4 +1,4 @@
-#Tabbed component exercise
+# Tabbed component exercise
 
 * Clone Repo
 * Run `yarn`
